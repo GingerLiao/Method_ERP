@@ -1,0 +1,270 @@
+// 美瑟科技進銷存 AI 平台 — 資料模型
+// 開發預設使用 SQLite（免安裝）。正式環境可將 provider 改為 "postgresql"。
+// 註：SQLite 不支援 enum，狀態/類型欄位以字串表示，允許值見各欄位註解。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────
+// 基礎資料：商品分類、商品、倉庫
+// ─────────────────────────────────────────────────────────
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String
+  parentId  Int?
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  products  Product[]
+  createdAt DateTime   @default(now())
+}
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  sku          String   @unique // 商品編號
+  name         String
+  barcode      String?
+  categoryId   Int?
+  category     Category? @relation(fields: [categoryId], references: [id])
+  unit         String    @default("個") // 單位
+  type         String    @default("STOCK") // STOCK 庫存品 / SERVICE 服務 / BOM 組合品
+  costPrice    Float     @default(0) // 標準成本
+  salePrice    Float     @default(0) // 標準售價
+  safetyStock  Float     @default(0) // 安全庫存
+  reorderPoint Float     @default(0) // 再訂購點
+  reorderQty   Float     @default(0) // 建議訂購量
+  description  String?
+  imageUrl     String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  inventories        Inventory[]
+  stockMovements     StockMovement[]
+  purchaseItems      PurchaseOrderItem[]
+  salesItems         SalesOrderItem[]
+  bom                Bom?               @relation("ProductBom")
+  bomComponentLines  BomItem[]          @relation("ComponentProduct")
+  productionOrders   ProductionOrder[]
+
+  @@index([categoryId])
+  @@index([type])
+}
+
+model Warehouse {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  location  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  inventories      Inventory[]
+  stockMovements   StockMovement[]
+  purchaseOrders   PurchaseOrder[]
+  salesOrders      SalesOrder[]
+  productionOrders ProductionOrder[]
+}
+
+// 各倉別的即時庫存
+model Inventory {
+  id          Int       @id @default(autoincrement())
+  productId   Int
+  product     Product   @relation(fields: [productId], references: [id])
+  warehouseId Int
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  quantity    Float     @default(0)
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([productId, warehouseId])
+  @@index([productId])
+}
+
+// 庫存異動總帳（所有進出調撥的來源）
+model StockMovement {
+  id          Int       @id @default(autoincrement())
+  productId   Int
+  product     Product   @relation(fields: [productId], references: [id])
+  warehouseId Int
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  type        String // IN 入庫 / OUT 出庫 / ADJUST 調整 / TRANSFER 調撥 / PRODUCE 生產入庫 / CONSUME 生產耗料
+  quantity    Float // 正數＝增加、負數＝減少
+  unitCost    Float     @default(0)
+  refType     String? // PURCHASE / SALE / PRODUCTION / MANUAL
+  refId       Int?
+  note        String?
+  createdAt   DateTime  @default(now())
+
+  @@index([productId])
+  @@index([warehouseId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────────────────
+// 採購（進）
+// ─────────────────────────────────────────────────────────
+
+model Supplier {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  contact   String?
+  phone     String?
+  email     String?
+  address   String?
+  taxId     String? // 統一編號
+  note      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  purchaseOrders PurchaseOrder[]
+}
+
+model PurchaseOrder {
+  id           Int       @id @default(autoincrement())
+  orderNo      String    @unique
+  supplierId   Int
+  supplier     Supplier  @relation(fields: [supplierId], references: [id])
+  warehouseId  Int
+  warehouse    Warehouse @relation(fields: [warehouseId], references: [id])
+  status       String    @default("DRAFT") // DRAFT 草稿 / CONFIRMED 已確認 / RECEIVED 已入庫 / CANCELLED 已取消
+  orderDate    DateTime  @default(now())
+  expectedDate DateTime?
+  note         String?
+  total        Float     @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  items PurchaseOrderItem[]
+
+  @@index([supplierId])
+  @@index([status])
+}
+
+model PurchaseOrderItem {
+  id          Int           @id @default(autoincrement())
+  poId        Int
+  po          PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
+  productId   Int
+  product     Product       @relation(fields: [productId], references: [id])
+  quantity    Float
+  unitPrice   Float
+  receivedQty Float         @default(0)
+  subtotal    Float         @default(0)
+
+  @@index([poId])
+}
+
+// ─────────────────────────────────────────────────────────
+// 銷售（銷）
+// ─────────────────────────────────────────────────────────
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  contact   String?
+  phone     String?
+  email     String?
+  address   String?
+  taxId     String?
+  note      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  salesOrders SalesOrder[]
+}
+
+model SalesOrder {
+  id          Int       @id @default(autoincrement())
+  orderNo     String    @unique
+  customerId  Int
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  warehouseId Int
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  status      String    @default("DRAFT") // DRAFT 草稿 / CONFIRMED 已確認 / SHIPPED 已出貨 / CANCELLED 已取消
+  orderDate   DateTime  @default(now())
+  note        String?
+  total       Float     @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  items SalesOrderItem[]
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model SalesOrderItem {
+  id         Int        @id @default(autoincrement())
+  soId       Int
+  so         SalesOrder @relation(fields: [soId], references: [id], onDelete: Cascade)
+  productId  Int
+  product    Product    @relation(fields: [productId], references: [id])
+  quantity   Float
+  unitPrice  Float
+  shippedQty Float      @default(0)
+  subtotal   Float      @default(0)
+
+  @@index([soId])
+}
+
+// ─────────────────────────────────────────────────────────
+// BOM 物料清單與生產
+// ─────────────────────────────────────────────────────────
+
+// 一個組合品/成品對應一份 BOM
+model Bom {
+  id        Int       @id @default(autoincrement())
+  productId Int       @unique
+  product   Product   @relation("ProductBom", fields: [productId], references: [id])
+  version   String    @default("v1")
+  note      String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  items            BomItem[]
+  productionOrders ProductionOrder[]
+}
+
+// BOM 的一筆用料（成品 = 多個元件）
+model BomItem {
+  id          Int     @id @default(autoincrement())
+  bomId       Int
+  bom         Bom     @relation(fields: [bomId], references: [id], onDelete: Cascade)
+  componentId Int
+  component   Product @relation("ComponentProduct", fields: [componentId], references: [id])
+  quantity    Float // 每個成品需要的元件數量
+  lossRate    Float   @default(0) // 損耗率 %
+  note        String?
+
+  @@index([bomId])
+}
+
+model ProductionOrder {
+  id           Int       @id @default(autoincrement())
+  orderNo      String    @unique
+  productId    Int
+  product      Product   @relation(fields: [productId], references: [id])
+  bomId        Int?
+  bom          Bom?      @relation(fields: [bomId], references: [id])
+  warehouseId  Int
+  warehouse    Warehouse @relation(fields: [warehouseId], references: [id])
+  quantity     Float // 計畫生產數量
+  status       String    @default("DRAFT") // DRAFT / IN_PROGRESS / COMPLETED / CANCELLED
+  startDate    DateTime?
+  completeDate DateTime?
+  note         String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([productId])
+  @@index([status])
+}
