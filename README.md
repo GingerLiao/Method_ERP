@@ -24,10 +24,10 @@
 ## 🛠 技術棧
 
 - **Next.js 14**（App Router）+ **TypeScript**
-- **Prisma ORM** — 開發用 SQLite（免安裝），正式可切換 PostgreSQL
+- **Prisma ORM** + **PostgreSQL**（雲端多人共用，推薦 Neon）
 - **Tailwind CSS** — UI 樣式
 - **Recharts** — 圖表
-- **Anthropic Claude API** — AI 功能
+- **Google Gemini / Anthropic Claude API** — AI 功能（可切換）
 - **Zod** — API 輸入驗證
 
 ---
@@ -40,7 +40,8 @@ npm install
 
 # 2. 設定環境變數
 cp .env.example .env
-#   預設使用 SQLite，開箱即用。若要 AI 功能，於 .env 填入 ANTHROPIC_API_KEY。
+#   填入 DATABASE_URL（Neon 免費 PostgreSQL 連線字串）
+#   要用 AI 功能，再填 GEMINI_API_KEY（免費）或 ANTHROPIC_API_KEY
 
 # 3. 一鍵初始化資料庫（generate + 建表 + 匯入示範資料）
 npm run setup
@@ -49,6 +50,8 @@ npm run setup
 npm run dev
 #   開啟 http://localhost:3000
 ```
+
+> 需要免費的雲端資料庫連線字串？到 <https://neon.tech> 註冊 → 建立專案 → 複製 Connection string。部署步驟見 [DEPLOY.md](./DEPLOY.md)。
 
 ### 常用指令
 
@@ -89,17 +92,9 @@ ANTHROPIC_MODEL="claude-sonnet-4-20250514"
 
 ---
 
-## 🔄 切換到 PostgreSQL（正式環境）
+## ☁️ 部署到雲端
 
-1. 修改 `prisma/schema.prisma` 的 datasource：
-   ```prisma
-   datasource db {
-     provider = "postgresql"
-     url      = env("DATABASE_URL")
-   }
-   ```
-2. `.env` 設定 `DATABASE_URL` 為 PostgreSQL 連線字串。
-3. 執行 `npx prisma migrate dev` 或 `npx prisma db push`。
+完整步驟（Vercel + Neon，含「push 自動更新」說明）請見 **[DEPLOY.md](./DEPLOY.md)**。
 
 ---
 
