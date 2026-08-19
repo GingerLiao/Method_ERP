@@ -16,7 +16,6 @@ const NAV: NavGroup[] = [
     items: [
       { href: "/products", label: "商品管理", icon: "📦" },
       { href: "/categories", label: "商品分類", icon: "🗂️" },
-      { href: "/warehouses", label: "倉庫管理", icon: "🏭" },
     ],
   },
   {

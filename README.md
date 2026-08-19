@@ -11,7 +11,7 @@
 | 模組 | 功能 |
 | --- | --- |
 | **儀表板** | 庫存總值、近 30 天進銷趨勢圖、補貨警示、待處理單據 |
-| **商品 / 庫存（存）** | 商品主檔、分類、多倉庫、即時庫存、庫存異動總帳、盤點調整 |
+| **商品 / 庫存（存）** | 商品主檔、分類、即時庫存、庫存異動總帳、盤點調整 |
 | **採購（進）** | 供應商管理、採購單、確認 / 入庫（自動增加庫存與異動紀錄） |
 | **銷售（銷）** | 客戶管理、銷售單、出貨（自動扣庫、庫存不足檢查） |
 | **BOM 物料清單** | 成品用料結構、損耗率、**多階展開**、標準成本自動roll-up |
@@ -24,10 +24,10 @@
 ## 🛠 技術棧
 
 - **Next.js 14**（App Router）+ **TypeScript**
-- **Prisma ORM** — 開發用 SQLite（免安裝），正式可切換 PostgreSQL
+- **Prisma ORM** + **PostgreSQL**（雲端多人共用，推薦 Neon）
 - **Tailwind CSS** — UI 樣式
 - **Recharts** — 圖表
-- **Anthropic Claude API** — AI 功能
+- **Google Gemini / Anthropic Claude API** — AI 功能（可切換）
 - **Zod** — API 輸入驗證
 
 ---
@@ -40,7 +40,8 @@ npm install
 
 # 2. 設定環境變數
 cp .env.example .env
-#   預設使用 SQLite，開箱即用。若要 AI 功能，於 .env 填入 ANTHROPIC_API_KEY。
+#   填入 DATABASE_URL（Neon 免費 PostgreSQL 連線字串）
+#   要用 AI 功能，再填 GEMINI_API_KEY（免費）或 ANTHROPIC_API_KEY
 
 # 3. 一鍵初始化資料庫（generate + 建表 + 匯入示範資料）
 npm run setup
@@ -49,6 +50,8 @@ npm run setup
 npm run dev
 #   開啟 http://localhost:3000
 ```
+
+> 需要免費的雲端資料庫連線字串？到 <https://neon.tech> 註冊 → 建立專案 → 複製 Connection string。部署步驟見 [DEPLOY.md](./DEPLOY.md)。
 
 ### 常用指令
 
@@ -64,29 +67,34 @@ npm run dev
 
 ## 🤖 啟用 AI 功能
 
-於 `.env` 設定：
+系統支援兩種 AI 供應商，會依你在 `.env` 填的金鑰**自動選擇**：
+
+### 選項 A：Google Gemini（免費，推薦先用）
+
+```env
+GEMINI_API_KEY="AIza..."
+GEMINI_MODEL="gemini-2.0-flash"
+```
+
+金鑰申請：<https://aistudio.google.com/apikey>（用 Google 帳號登入即可，免信用卡、有免費額度）
+
+### 選項 B：Anthropic Claude（需付費儲值）
 
 ```env
 ANTHROPIC_API_KEY="sk-ant-..."
 ANTHROPIC_MODEL="claude-sonnet-4-20250514"
 ```
 
-- **未設定金鑰**時，「智慧補貨」仍會以統計基準（日均消耗、可用天數）運作；「AI 輸入助手」則需要金鑰。
-- 金鑰申請：<https://console.anthropic.com/>
+金鑰申請：<https://console.anthropic.com/>
+
+> 兩把金鑰都填時，可用 `AI_PROVIDER="gemini"` 或 `"anthropic"` 指定；未指定則優先 Gemini。
+> **未設定任何金鑰**時，「智慧補貨」仍會以統計基準（日均消耗、可用天數）運作；「AI 輸入助手」則需要金鑰。
 
 ---
 
-## 🔄 切換到 PostgreSQL（正式環境）
+## ☁️ 部署到雲端
 
-1. 修改 `prisma/schema.prisma` 的 datasource：
-   ```prisma
-   datasource db {
-     provider = "postgresql"
-     url      = env("DATABASE_URL")
-   }
-   ```
-2. `.env` 設定 `DATABASE_URL` 為 PostgreSQL 連線字串。
-3. 執行 `npx prisma migrate dev` 或 `npx prisma db push`。
+完整步驟（Vercel + Neon，含「push 自動更新」說明）請見 **[DEPLOY.md](./DEPLOY.md)**。
 
 ---
 

@@ -13,7 +13,7 @@ export default function AssistantPage() {
       />
       {!isAiConfigured() && (
         <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          尚未設定 <code className="rounded bg-amber-100 px-1">ANTHROPIC_API_KEY</code>。請在 <code className="rounded bg-amber-100 px-1">.env</code> 填入金鑰後即可使用 AI 助手。
+          尚未設定 AI 金鑰。請在 <code className="rounded bg-amber-100 px-1">.env</code> 填入 <code className="rounded bg-amber-100 px-1">GEMINI_API_KEY</code>（免費，推薦）或 <code className="rounded bg-amber-100 px-1">ANTHROPIC_API_KEY</code> 後即可使用 AI 助手。
         </div>
       )}
       <AssistantClient />

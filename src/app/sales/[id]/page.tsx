@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function SaleDetailPage({ params }: { params: { id: string } }) {
   const so = await prisma.salesOrder.findUnique({
     where: { id: Number(params.id) },
-    include: { customer: true, warehouse: true, items: { include: { product: true } } },
+    include: { customer: true, items: { include: { product: true } } },
   });
   if (!so) notFound();
 
@@ -25,7 +25,6 @@ export default async function SaleDetailPage({ params }: { params: { id: string 
       <div className="mb-4 card grid grid-cols-2 gap-4 p-6 sm:grid-cols-4">
         <Info label="狀態" value={<StatusBadge status={so.status} />} />
         <Info label="客戶" value={so.customer.name} />
-        <Info label="出貨倉" value={so.warehouse.name} />
         <Info label="訂購日" value={formatDate(so.orderDate)} />
         <Info label="備註" value={so.note || "-"} />
       </div>

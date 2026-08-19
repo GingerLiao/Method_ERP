@@ -6,10 +6,7 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function NewProductionPage() {
-  const [boms, warehouses] = await Promise.all([
-    prisma.bom.findMany({ include: { product: true }, orderBy: { productId: "asc" } }),
-    prisma.warehouse.findMany({ where: { isActive: true }, orderBy: { code: "asc" } }),
-  ]);
+  const boms = await prisma.bom.findMany({ include: { product: true }, orderBy: { productId: "asc" } });
 
   if (boms.length === 0) {
     return (
@@ -28,7 +25,6 @@ export default async function NewProductionPage() {
       <PageHeader title="新增生產工單" subtitle="選擇成品與數量，系統將依 BOM 展開用料" />
       <ProductionForm
         products={boms.map((b) => ({ id: b.product.id, sku: b.product.sku, name: b.product.name, unit: b.product.unit }))}
-        warehouses={warehouses.map((w) => ({ id: w.id, name: w.name }))}
       />
     </div>
   );

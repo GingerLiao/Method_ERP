@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function SalesPage() {
   const orders = await prisma.salesOrder.findMany({
-    include: { customer: true, warehouse: true, _count: { select: { items: true } } },
+    include: { customer: true, _count: { select: { items: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -27,7 +27,6 @@ export default async function SalesPage() {
               <tr>
                 <th className="th">單號</th>
                 <th className="th">客戶</th>
-                <th className="th">出貨倉</th>
                 <th className="th">日期</th>
                 <th className="th text-right">明細</th>
                 <th className="th text-right">金額</th>
@@ -43,7 +42,6 @@ export default async function SalesPage() {
                     </Link>
                   </td>
                   <td className="td font-medium text-slate-900">{o.customer.name}</td>
-                  <td className="td text-slate-500">{o.warehouse.name}</td>
                   <td className="td text-slate-400">{formatDate(o.orderDate)}</td>
                   <td className="td text-right text-slate-500">{o._count.items} 項</td>
                   <td className="td text-right font-semibold">{formatMoney(o.total)}</td>

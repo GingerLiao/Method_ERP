@@ -11,7 +11,7 @@ export default async function EditProductPage({ params }: { params: { id: string
   const [product, categories] = await Promise.all([
     prisma.product.findUnique({
       where: { id },
-      include: { inventories: { include: { warehouse: true } } },
+      include: { inventories: true },
     }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ]);
@@ -31,16 +31,10 @@ export default async function EditProductPage({ params }: { params: { id: string
 
       {product.inventories.length > 0 && (
         <div className="mb-4 card p-4">
-          <div className="mb-2 text-sm font-semibold text-slate-700">各倉庫存</div>
-          <div className="flex flex-wrap gap-3">
-            {product.inventories.map((inv) => (
-              <div key={inv.id} className="rounded-lg bg-slate-50 px-4 py-2">
-                <div className="text-xs text-slate-400">{inv.warehouse.name}</div>
-                <div className="text-lg font-bold text-slate-900">
-                  {formatQty(inv.quantity)} <span className="text-xs font-normal text-slate-400">{product.unit}</span>
-                </div>
-              </div>
-            ))}
+          <div className="mb-2 text-sm font-semibold text-slate-700">目前庫存</div>
+          <div className="text-lg font-bold text-slate-900">
+            {formatQty(product.inventories.reduce((s, i) => s + i.quantity, 0))}
+            <span className="ml-1 text-xs font-normal text-slate-400">{product.unit}</span>
           </div>
         </div>
       )}

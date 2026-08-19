@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function PurchasingPage() {
   const orders = await prisma.purchaseOrder.findMany({
-    include: { supplier: true, warehouse: true, _count: { select: { items: true } } },
+    include: { supplier: true, _count: { select: { items: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -27,7 +27,6 @@ export default async function PurchasingPage() {
               <tr>
                 <th className="th">單號</th>
                 <th className="th">供應商</th>
-                <th className="th">倉庫</th>
                 <th className="th">日期</th>
                 <th className="th text-right">明細</th>
                 <th className="th text-right">金額</th>
@@ -43,7 +42,6 @@ export default async function PurchasingPage() {
                     </Link>
                   </td>
                   <td className="td font-medium text-slate-900">{o.supplier.name}</td>
-                  <td className="td text-slate-500">{o.warehouse.name}</td>
                   <td className="td text-slate-400">{formatDate(o.orderDate)}</td>
                   <td className="td text-right text-slate-500">{o._count.items} 項</td>
                   <td className="td text-right font-semibold">{formatMoney(o.total)}</td>

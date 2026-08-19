@@ -1,13 +1,13 @@
 // 美瑟科技進銷存 AI 平台 — 資料模型
-// 開發預設使用 SQLite（免安裝）。正式環境可將 provider 改為 "postgresql"。
-// 註：SQLite 不支援 enum，狀態/類型欄位以字串表示，允許值見各欄位註解。
+// 使用 PostgreSQL（正式部署與雲端多人共用）。本機開發也用同一個 Neon 連線字串。
+// 註：狀態/類型欄位以字串表示，允許值見各欄位註解。
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

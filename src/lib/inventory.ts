@@ -76,3 +76,16 @@ export async function nextSeq(
   const count = await (prisma[model] as any).count();
   return count + 1;
 }
+
+/**
+ * 取得預設倉庫 ID。系統已簡化為單一倉庫（小型公司無需多倉），
+ * 若尚未有任何倉庫則自動建立一個，確保庫存邏輯永遠可運作。
+ */
+export async function getDefaultWarehouseId(): Promise<number> {
+  const existing = await prisma.warehouse.findFirst({ orderBy: { id: "asc" } });
+  if (existing) return existing.id;
+  const created = await prisma.warehouse.create({
+    data: { code: "WH01", name: "主倉庫" },
+  });
+  return created.id;
+}

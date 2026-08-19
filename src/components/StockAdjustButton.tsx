@@ -7,18 +7,15 @@ export default function StockAdjustButton({
   productId,
   productName,
   unit,
-  warehouses,
 }: {
   productId: number;
   productName: string;
   unit: string;
-  warehouses: { id: number; name: string }[];
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
-    warehouseId: warehouses[0]?.id ?? 0,
     type: "IN",
     quantity: 0,
     note: "",
@@ -46,13 +43,6 @@ export default function StockAdjustButton({
             <h3 className="mb-1 text-lg font-bold text-slate-900">庫存調整</h3>
             <p className="mb-4 text-sm text-slate-500">{productName}</p>
             <div className="space-y-3">
-              <div>
-                <label className="label">倉庫</label>
-                <select className="input" value={form.warehouseId}
-                  onChange={(e) => setForm({ ...form, warehouseId: Number(e.target.value) })}>
-                  {warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                </select>
-              </div>
               <div>
                 <label className="label">異動方式</label>
                 <select className="input" value={form.type}

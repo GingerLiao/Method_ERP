@@ -5,19 +5,16 @@ import { useState } from "react";
 import { formatMoney } from "@/lib/utils";
 
 type Party = { id: number; name: string; code: string };
-type Warehouse = { id: number; name: string };
 type Product = { id: number; sku: string; name: string; unit: string; price: number };
 type Line = { productId: number; quantity: number; unitPrice: number };
 
 export default function OrderForm({
   mode,
   parties,
-  warehouses,
   products,
 }: {
   mode: "purchase" | "sale";
   parties: Party[];
-  warehouses: Warehouse[];
   products: Product[];
 }) {
   const router = useRouter();
@@ -27,7 +24,6 @@ export default function OrderForm({
   const partyLabel = isPurchase ? "供應商" : "客戶";
 
   const [partyId, setPartyId] = useState<number>(parties[0]?.id ?? 0);
-  const [warehouseId, setWarehouseId] = useState<number>(warehouses[0]?.id ?? 0);
   const [note, setNote] = useState("");
   const [lines, setLines] = useState<Line[]>([]);
   const [error, setError] = useState("");
@@ -61,7 +57,7 @@ export default function OrderForm({
       const res = await fetch(apiBase, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [key]: partyId, warehouseId, note, items: lines }),
+        body: JSON.stringify({ [key]: partyId, note, items: lines }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "建立失敗");
       router.push(listUrl);
@@ -77,17 +73,11 @@ export default function OrderForm({
     <form onSubmit={submit}>
       {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
-      <div className="card mb-4 grid grid-cols-1 gap-4 p-6 sm:grid-cols-3">
+      <div className="card mb-4 grid grid-cols-1 gap-4 p-6 sm:grid-cols-2">
         <div>
           <label className="label">{partyLabel} *</label>
           <select className="input" value={partyId} onChange={(e) => setPartyId(Number(e.target.value))}>
             {parties.map((p) => <option key={p.id} value={p.id}>{p.code} · {p.name}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="label">倉庫 *</label>
-          <select className="input" value={warehouseId} onChange={(e) => setWarehouseId(Number(e.target.value))}>
-            {warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
           </select>
         </div>
         <div>
