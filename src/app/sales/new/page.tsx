@@ -6,9 +6,8 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function NewSalePage() {
-  const [customers, warehouses, products] = await Promise.all([
+  const [customers, products] = await Promise.all([
     prisma.customer.findMany({ where: { isActive: true }, orderBy: { code: "asc" } }),
-    prisma.warehouse.findMany({ where: { isActive: true }, orderBy: { code: "asc" } }),
     prisma.product.findMany({ where: { isActive: true }, orderBy: { sku: "asc" } }),
   ]);
 
@@ -30,7 +29,6 @@ export default async function NewSalePage() {
       <OrderForm
         mode="sale"
         parties={customers.map((c) => ({ id: c.id, name: c.name, code: c.code }))}
-        warehouses={warehouses.map((w) => ({ id: w.id, name: w.name }))}
         products={products.map((p) => ({ id: p.id, sku: p.sku, name: p.name, unit: p.unit, price: p.salePrice }))}
       />
     </div>

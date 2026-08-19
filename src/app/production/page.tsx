@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ProductionPage() {
   const orders = await prisma.productionOrder.findMany({
-    include: { product: true, warehouse: true },
+    include: { product: true },
     orderBy: { createdAt: "desc" },
   });
 
@@ -27,7 +27,6 @@ export default async function ProductionPage() {
               <tr>
                 <th className="th">工單號</th>
                 <th className="th">成品</th>
-                <th className="th">生產倉</th>
                 <th className="th text-right">數量</th>
                 <th className="th">建立日</th>
                 <th className="th">狀態</th>
@@ -42,7 +41,6 @@ export default async function ProductionPage() {
                     </Link>
                   </td>
                   <td className="td font-medium text-slate-900">{o.product.name}</td>
-                  <td className="td text-slate-500">{o.warehouse.name}</td>
                   <td className="td text-right font-semibold">{formatQty(o.quantity)} {o.product.unit}</td>
                   <td className="td text-slate-400">{formatDate(o.createdAt)}</td>
                   <td className="td"><StatusBadge status={o.status} /></td>

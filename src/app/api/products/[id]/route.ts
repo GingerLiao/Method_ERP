@@ -20,7 +20,7 @@ const updateSchema = z.object({
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const product = await prisma.product.findUnique({
     where: { id: Number(params.id) },
-    include: { category: true, inventories: { include: { warehouse: true } } },
+    include: { category: true, inventories: true },
   });
   if (!product) return NextResponse.json({ error: "找不到商品" }, { status: 404 });
   return NextResponse.json(product);

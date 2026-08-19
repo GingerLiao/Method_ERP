@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { makeOrderNo } from "@/lib/utils";
-import { nextSeq } from "@/lib/inventory";
+import { nextSeq, getDefaultWarehouseId } from "@/lib/inventory";
 
 const schema = z.object({
   supplierId: z.coerce.number().int(),
-  warehouseId: z.coerce.number().int(),
   expectedDate: z.string().optional().nullable(),
   note: z.string().optional().nullable(),
   items: z
@@ -28,12 +27,13 @@ export async function POST(req: NextRequest) {
   const d = parsed.data;
   const total = d.items.reduce((s, it) => s + it.quantity * it.unitPrice, 0);
   const seq = await nextSeq("purchaseOrder");
+  const warehouseId = await getDefaultWarehouseId();
 
   const po = await prisma.purchaseOrder.create({
     data: {
       orderNo: makeOrderNo("PO", seq),
       supplierId: d.supplierId,
-      warehouseId: d.warehouseId,
+      warehouseId,
       expectedDate: d.expectedDate ? new Date(d.expectedDate) : null,
       note: d.note,
       total,

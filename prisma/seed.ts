@@ -28,11 +28,9 @@ async function main() {
   await prisma.customer.deleteMany();
 
   console.log("🏭 建立倉庫...");
+  // 系統已簡化為單一倉庫（小型公司無需多倉），內部仍保留一筆預設倉庫以維持庫存邏輯
   const whMain = await prisma.warehouse.create({
     data: { code: "WH01", name: "主倉庫", location: "新竹科學園區" },
-  });
-  const whProd = await prisma.warehouse.create({
-    data: { code: "WH02", name: "生產倉", location: "新竹廠 B 棟" },
   });
 
   console.log("🗂️ 建立分類...");
@@ -247,13 +245,13 @@ async function main() {
   await prisma.productionOrder.create({
     data: {
       orderNo: `MO${new Date().getFullYear()}0801-0001`,
-      productId: iotDevice.id, bomId: bomIot.id, warehouseId: whProd.id,
+      productId: iotDevice.id, bomId: bomIot.id, warehouseId: whMain.id,
       quantity: 50, status: "DRAFT", note: "補充成品庫存",
     },
   });
 
   console.log("✅ 種子資料建立完成！");
-  console.log(`   商品 ${allProducts.length} 筆、倉庫 2、供應商 2、客戶 2`);
+  console.log(`   商品 ${allProducts.length} 筆、供應商 2、客戶 2`);
 }
 
 main()

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function ProductionDetailPage({ params }: { params: { id: string } }) {
   const mo = await prisma.productionOrder.findUnique({
     where: { id: Number(params.id) },
-    include: { product: true, warehouse: true },
+    include: { product: true },
   });
   if (!mo) notFound();
 
@@ -40,7 +40,6 @@ export default async function ProductionDetailPage({ params }: { params: { id: s
         <Info label="狀態" value={<StatusBadge status={mo.status} />} />
         <Info label="成品" value={`${mo.product.name}`} />
         <Info label="生產數量" value={`${formatQty(mo.quantity)} ${mo.product.unit}`} />
-        <Info label="生產倉" value={mo.warehouse.name} />
         <Info label="開工日" value={formatDate(mo.startDate)} />
         <Info label="完工日" value={formatDate(mo.completeDate)} />
         <Info label="預估用料成本" value={formatMoney(materialCost)} />
