@@ -19,12 +19,13 @@ export default function MasterCrud({
   apiBase,
   fields,
   rows,
-  extraColumn,
+  displayColumns,
 }: {
   apiBase: string;
   fields: Field[];
   rows: Row[];
-  extraColumn?: { header: string; render: (r: Row) => React.ReactNode };
+  // 只顯示、不可編輯的欄位（例如統計數字）。用資料驅動，避免跨伺服器/客戶端傳函式。
+  displayColumns?: { key: string; label: string }[];
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState<Row | null>(null);
@@ -93,14 +94,16 @@ export default function MasterCrud({
                 {tableFields.map((f) => (
                   <th key={f.key} className="th">{f.label}</th>
                 ))}
-                {extraColumn && <th className="th">{extraColumn.header}</th>}
+                {displayColumns?.map((c) => (
+                  <th key={c.key} className="th">{c.label}</th>
+                ))}
                 <th className="th"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={tableFields.length + 2} className="td py-10 text-center text-slate-400">
+                  <td colSpan={tableFields.length + (displayColumns?.length ?? 0) + 1} className="td py-10 text-center text-slate-400">
                     尚無資料
                   </td>
                 </tr>
@@ -114,7 +117,9 @@ export default function MasterCrud({
                           : r[f.key] ?? "-"}
                       </td>
                     ))}
-                    {extraColumn && <td className="td">{extraColumn.render(r)}</td>}
+                    {displayColumns?.map((c) => (
+                      <td key={c.key} className="td text-slate-500">{r[c.key] ?? "-"}</td>
+                    ))}
                     <td className="td text-right">
                       <button onClick={() => openEdit(r)} className="mr-3 text-brand-600 hover:underline">編輯</button>
                       <button onClick={() => remove(r)} className="text-red-500 hover:underline">刪除</button>

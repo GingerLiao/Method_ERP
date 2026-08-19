@@ -19,7 +19,7 @@ export default async function CategoriesPage() {
         apiBase="/api/categories"
         fields={fields}
         rows={rows}
-        extraColumn={{ header: "商品數", render: (r) => <span className="text-slate-500">{r.count}</span> }}
+        displayColumns={[{ key: "count", label: "商品數" }]}
       />
     </div>
   );
