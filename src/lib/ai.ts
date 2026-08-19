@@ -1,6 +1,6 @@
 // AI 供應商抽象層：同時支援 Google Gemini（免費額度）與 Anthropic Claude。
 // 依環境變數自動選擇：
-//   - 設定 GEMINI_API_KEY → 使用 Gemini（預設 gemini-2.0-flash）
+//   - 設定 GEMINI_API_KEY → 使用 Gemini（預設 gemini-3.6-flash）
 //   - 設定 ANTHROPIC_API_KEY → 使用 Claude
 //   - 兩者皆有時，可用 AI_PROVIDER=gemini|anthropic 指定；未指定則優先 Gemini
 import Anthropic from "@anthropic-ai/sdk";
@@ -48,7 +48,7 @@ async function geminiGenerate(args: {
   maxTokens?: number;
   json?: boolean;
 }): Promise<string> {
-  const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-3.6-flash";
   const key = process.env.GEMINI_API_KEY;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
 

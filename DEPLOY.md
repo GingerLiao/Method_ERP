@@ -32,7 +32,7 @@
    | --- | --- |
    | `DATABASE_URL` | 步驟 1 複製的 Neon 連線字串 |
    | `GEMINI_API_KEY` | 你的 Gemini 金鑰（要用 AI 才需要） |
-   | `GEMINI_MODEL` | `gemini-2.0-flash` |
+   | `GEMINI_MODEL` | `gemini-3.6-flash` |
 
 5. 點 **Deploy**，等待 1～3 分鐘
 
