@@ -73,7 +73,7 @@ npm run dev
 
 ```env
 GEMINI_API_KEY="AIza..."
-GEMINI_MODEL="gemini-2.0-flash"
+GEMINI_MODEL="gemini-3.6-flash"
 ```
 
 金鑰申請：<https://aistudio.google.com/apikey>（用 Google 帳號登入即可，免信用卡、有免費額度）
