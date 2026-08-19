@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   if (!isAiConfigured()) {
-    return NextResponse.json({ error: "尚未設定 ANTHROPIC_API_KEY，AI 助手無法使用" }, { status: 400 });
+    return NextResponse.json({ error: "尚未設定 AI 金鑰（GEMINI_API_KEY 或 ANTHROPIC_API_KEY），AI 助手無法使用" }, { status: 400 });
   }
   const { mode, text } = await req.json();
   if (!text?.trim()) return NextResponse.json({ error: "請輸入內容" }, { status: 400 });

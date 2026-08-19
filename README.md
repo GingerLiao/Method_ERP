@@ -64,15 +64,28 @@ npm run dev
 
 ## 🤖 啟用 AI 功能
 
-於 `.env` 設定：
+系統支援兩種 AI 供應商，會依你在 `.env` 填的金鑰**自動選擇**：
+
+### 選項 A：Google Gemini（免費，推薦先用）
+
+```env
+GEMINI_API_KEY="AIza..."
+GEMINI_MODEL="gemini-2.0-flash"
+```
+
+金鑰申請：<https://aistudio.google.com/apikey>（用 Google 帳號登入即可，免信用卡、有免費額度）
+
+### 選項 B：Anthropic Claude（需付費儲值）
 
 ```env
 ANTHROPIC_API_KEY="sk-ant-..."
 ANTHROPIC_MODEL="claude-sonnet-4-20250514"
 ```
 
-- **未設定金鑰**時，「智慧補貨」仍會以統計基準（日均消耗、可用天數）運作；「AI 輸入助手」則需要金鑰。
-- 金鑰申請：<https://console.anthropic.com/>
+金鑰申請：<https://console.anthropic.com/>
+
+> 兩把金鑰都填時，可用 `AI_PROVIDER="gemini"` 或 `"anthropic"` 指定；未指定則優先 Gemini。
+> **未設定任何金鑰**時，「智慧補貨」仍會以統計基準（日均消耗、可用天數）運作；「AI 輸入助手」則需要金鑰。
 
 ---
 
